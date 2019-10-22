@@ -1,0 +1,15 @@
+{
+  "name": "tplink",
+  "version": "1.0.0",
+  "description": "TP Link Stats Logger",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Rahul Kadukar",
+  "license": "ISC",
+  "dependencies": {
+    "tplink-smarthome-api": "^0.22.0",
+    "winston": "^2.4.0"
+  }
+}
