@@ -1,43 +1,46 @@
-console.log(process.version);
-const { Client } = require('tplink-smarthome-api');
-const winston = require('winston');
-var z = 0;
+const { Client } = require('tplink-smarthome-api')
+const winston = require('winston')
+const devices = require('./config/devices.private.json')
+var z = 0
 
-const client = new Client();
+const client = new Client({logLevel: 'info'})
 
-// Look for devices, log to console
-client.startDiscovery().on('device-new', (device) => {
-  device.getInfo().then(function(data) {
-    let payload = {};
-    payload.mac = data.sysInfo.mac;
-    payload.curr = data.emeter.realtime.current;
-    payload.volt = data.emeter.realtime.voltage;
-    payload.power = data.emeter.realtime.power;
-    payload.total = data.emeter.realtime.total;
+async function getDeviceInfo(deviceAddr) {
+  const returnData = { errMessage: '', returnCode: 0 }
+  try {
+    const deviceData = await client.getDevice({ host: deviceAddr })
+    const data = await deviceData.getInfo()
+    returnData.data = data
+  } catch (excp) {
+    const excpMessage =  excp.message || `Exception occured`
+    retunrData.errMessage = excpMessage
+    returnData.returnCode = -1   
+  } finally {
+    return returnData
+  }
+}
 
-    logger.info({
-      'message': payload
-    })
-    
-    if (z++ === 10) {
-      z = 0;
-      if (Math.random() < 0.1) {
-        console.log('Last logged at ' + Date());
-      }
-    }
-  });  
+devices.forEach(async (device) => {
+  const deviceData = await getDeviceInfo(device)
+  if (deviceData.returnCode === 0) {
+    const data = deviceData.data
+    const payload = {}
+    payload.mac = data.sysInfo.mac
+    payload.alias = data.sysInfo.alias
+    payload.curr = data.emeter.realtime.current
+    payload.volt = data.emeter.realtime.voltage
+    payload.power = data.emeter.realtime.power
+    payload.total = data.emeter.realtime.total
+
+    logger.info({'message': payload})
+  }
 })
 
 const logger = new (winston.Logger)({
   transports: [
     new (winston.transports.File)({ 
-      filename: '/home/pi/code/node/tplink/logs/tplink.log' 
+      filename: '/home/rahul/github/tplink-logs/tplink.log' 
     })
   ]
 });
 
-(function(){
-  setTimeout(function(){
-    process.exit();
-  }, 100000);
-})();
