@@ -12,13 +12,21 @@ async function getDeviceInfo(deviceAddr) {
     const data = await deviceData.getInfo()
     returnData.data = data
   } catch (excp) {
-    const excpMessage =  excp.message || `Exception occured`
-    retunrData.errMessage = excpMessage
+    const excpMessage =  excp.message ? excp.message : `Exception occured`
+    returnData.errMessage = excpMessage
     returnData.returnCode = -1   
   } finally {
     return returnData
   }
 }
+
+const logger = new (winston.Logger)({
+  transports: [
+    new (winston.transports.File)({ 
+      filename: `./logs/tplink_${new Date().toISOString().slice(0,10)}.log` 
+    })
+  ]
+});
 
 devices.forEach(async (device) => {
   const deviceData = await getDeviceInfo(device)
@@ -27,20 +35,17 @@ devices.forEach(async (device) => {
     const payload = {}
     payload.mac = data.sysInfo.mac
     payload.alias = data.sysInfo.alias
-    payload.curr = data.emeter.realtime.current
-    payload.volt = data.emeter.realtime.voltage
-    payload.power = data.emeter.realtime.power
-    payload.total = data.emeter.realtime.total
+    payload.state = data.sysInfo.relay_state
+    payload.ontime = data.sysInfo.on_time
+
+    if (data.sysInfo.model.slice(0,5) === 'HS110') {
+      payload.curr = data.emeter.realtime.current
+      payload.volt = data.emeter.realtime.voltage
+      payload.power = data.emeter.realtime.power
+      payload.total = data.emeter.realtime.total
+    }
 
     logger.info({'message': payload})
   }
 })
-
-const logger = new (winston.Logger)({
-  transports: [
-    new (winston.transports.File)({ 
-      filename: '/home/rahul/github/tplink-logs/tplink.log' 
-    })
-  ]
-});
 
