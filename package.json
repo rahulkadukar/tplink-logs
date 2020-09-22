@@ -9,6 +9,7 @@
   "author": "Rahul Kadukar",
   "license": "ISC",
   "dependencies": {
+    "node-cron": "^2.0.3",
     "tplink-smarthome-api": "^0.22.0",
     "winston": "^2.4.0"
   }

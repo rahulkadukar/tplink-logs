@@ -1,4 +1,5 @@
 const { Client } = require('tplink-smarthome-api')
+const cron = require('node-cron')
 const fs = require('fs')
 const winston = require('winston')
 const devices = require('./config/devices.private.json')
@@ -27,11 +28,12 @@ async function getDeviceInfo(deviceAddr) {
 const logger = new (winston.Logger)({
   transports: [
     new (winston.transports.File)({ 
-      filename: `./logs/tplink_${new Date().toISOString().slice(0,10)}.log` 
+      filename: `./logs/monitor_${new Date().toISOString().slice(0,10)}.log` 
     })
   ]
 });
 
+cron.schedule('*/2 * * * * *', () => {
 devices.forEach(async (device) => {
   const deviceData = await getDeviceInfo(device)
   if (deviceData.returnCode === 0) {
@@ -51,5 +53,6 @@ devices.forEach(async (device) => {
 
     logger.info({'message': payload})
   }
+})
 })
 
