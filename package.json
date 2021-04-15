@@ -4,13 +4,20 @@
   "description": "TP Link Stats Logger",
   "main": "index.js",
   "scripts": {
+    "dev": "nodemon tplink.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Rahul Kadukar",
   "license": "ISC",
   "dependencies": {
+    "chalk": "^4.1.0",
+    "node-cache": "^5.1.2",
     "node-cron": "^2.0.3",
+    "pg": "^8.5.1",
     "tplink-smarthome-api": "^0.22.0",
     "winston": "^2.4.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
   }
 }

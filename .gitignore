@@ -1,4 +1,4 @@
-*.private.json
+*.private
 *.log
 *.swp
 logs/
