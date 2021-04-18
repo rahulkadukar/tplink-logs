@@ -21,5 +21,4 @@ build:
     - echo "Start building App"
     - echo $CI_REGISTRY_IMAGE
     - npm install
-    - CI=false npm run build
     - echo "Build successfully!"
