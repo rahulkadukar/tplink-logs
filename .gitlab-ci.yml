@@ -11,6 +11,7 @@ cache:
 
 stages:
   - build
+  - commit:analysis
 
 build:
   stage: build
@@ -26,3 +27,8 @@ build:
 
 include:
   - template: Security/Secret-Detection.gitlab-ci.yml
+
+.secret-analyzer:
+  stage: commit:analysis
+  needs: []
+
