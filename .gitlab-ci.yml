@@ -26,7 +26,6 @@ build:
 
 
 include:
-  - template: Security/Dependency-Scanning.gitlab-ci.yml
   - template: Security/SAST.gitlab-ci.yml
   - template: Security/Secret-Detection.gitlab-ci.yml
 
@@ -36,7 +35,9 @@ secret_detection:
 
 sast:
   stage: commit:analysis
-  needs: []
+  variables:
+    SAST_EXCLUDED_PATHS: '/test/**,**/*-test.js,/scripts,/build-scripts'
+    SEARCH_MAX_DEPTH: 4
 
 .secret-analyzer:
   stage: commit:analysis
