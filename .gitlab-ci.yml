@@ -57,6 +57,7 @@ code_quality:
     reports:
       codequality: gl-code-quality-report.json
   stage: quality
+  needs: []
 
 sast:
   artifacts:
@@ -66,6 +67,7 @@ sast:
   variables:
     SAST_EXCLUDED_PATHS: '/test/**,**/*-test.js,/scripts,/build-scripts'
     SEARCH_MAX_DEPTH: 4
+  needs: []
 
 .secret-analyzer:
   artifacts:
