@@ -11,7 +11,9 @@ cache:
 
 stages:
   - build
-  - commit:analysis
+  - quality
+  - security
+  - dockerize
 
 build:
   stage: build
@@ -24,6 +26,15 @@ build:
     - npm install
     - echo "Build successfully!"
 
+dockerize:
+  stage: dockerize
+  image: docker:latest
+  variables:
+    IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build -t $IMAGE_TAG .
+    - docker push $IMAGE_TAG
 
 include:
   - template: Security/SAST.gitlab-ci.yml
@@ -42,13 +53,13 @@ code_quality:
   artifacts:
     reports:
       codequality: gl-code-quality-report.json
-  stage: commit:analysis
+  stage: quality
 
 sast:
   artifacts:
     reports:
       sast: gl-sast-report.json
-  stage: commit:analysis
+  stage: security
   variables:
     SAST_EXCLUDED_PATHS: '/test/**,**/*-test.js,/scripts,/build-scripts'
     SEARCH_MAX_DEPTH: 4
@@ -57,5 +68,5 @@ sast:
   artifacts:
     reports:
       secret_detection: gl-secret-detection-report.json
-  stage: commit:analysis
+  stage: security
   needs: []
