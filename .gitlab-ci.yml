@@ -38,11 +38,6 @@ sast:
   stage: commit:analysis
   needs: []
 
-
-artifacts:
-  reports:
-    sast: gl-sast-report.json
-
 .secret-analyzer:
   stage: commit:analysis
   needs: []
