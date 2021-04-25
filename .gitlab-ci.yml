@@ -32,6 +32,10 @@ secret_detection:
   variables:
     SECRET_DETECTION_HISTORIC_SCAN: "true"
 
+artifacts:
+  paths:
+    - gl-sast-report.json
+
 .secret-analyzer:
   stage: commit:analysis
   needs: []
