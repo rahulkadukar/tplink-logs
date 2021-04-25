@@ -22,3 +22,7 @@ build:
     - echo $CI_REGISTRY_IMAGE
     - npm install
     - echo "Build successfully!"
+
+
+include:
+  - template: Security/Secret-Detection.gitlab-ci.yml
