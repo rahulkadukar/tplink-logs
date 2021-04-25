@@ -28,18 +28,34 @@ build:
 include:
   - template: Security/SAST.gitlab-ci.yml
   - template: Security/Secret-Detection.gitlab-ci.yml
+  - template: Code-Quality.gitlab-ci.yml
 
 secret_detection:
   variables:
     SECRET_DETECTION_HISTORIC_SCAN: "true"
 
+code_quality:
+  variables:
+    DOCKER_DRIVER: overlay2
+  services:
+    - docker:stable-dind
+  artifacts:
+    reports:
+      codequality: gl-code-quality-report.json
+  stage: commit:analysis
+
 sast:
+  artifacts:
+    reports:
+      sast: gl-sast-report.json
   stage: commit:analysis
   variables:
     SAST_EXCLUDED_PATHS: '/test/**,**/*-test.js,/scripts,/build-scripts'
     SEARCH_MAX_DEPTH: 4
 
 .secret-analyzer:
+  artifacts:
+    reports:
+      secret_detection: gl-secret-detection-report.json
   stage: commit:analysis
   needs: []
-
