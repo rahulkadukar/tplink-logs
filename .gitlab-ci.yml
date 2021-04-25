@@ -27,8 +27,10 @@ build:
     - echo "Build successfully!"
 
 dockerize:
+  image: docker:19.03.12
   stage: dockerize
-  image: docker:latest
+  services:
+    - docker:stable-dind
   variables:
     IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
   script:
