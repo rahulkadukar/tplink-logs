@@ -1,15 +1,14 @@
 const { Client } = require('tplink-smarthome-api')
 const chalk = require('chalk')
 const cron = require('node-cron')
-const { exec } = require("child_process");
+const { exec } = require("child_process")
 const fs = require('fs')
 const winston = require('winston')
 const { getOsInfo } = require('winston/lib/winston/exception');
 const { init } = require('./server/logProcessor');
 
-
 const devices = JSON.parse(fs.readFileSync(`./config/devices.json.private`, `utf-8`))
-
+const etekDevices = JSON.parse(fs.readFileSync(`./config/etek.json.private`, `utf-8`))
 
 const client = new Client({logLevel: 'info'})
 const logDir = 'logs'
@@ -110,6 +109,65 @@ const loggerFunc = (fileName) => new (winston.Logger)({
   ]
 })
 
+async function getEtekStats() {
+  try {
+    const rawDeviceData = await execCommand("python etekcity.py")
+    const deviceData = rawDeviceData.data.split(`\n`)
+      .filter(r => r.length !== 0)
+      .map(r => r.replace(/\'/g, '"'))
+
+    deviceData.forEach(espdevice => {
+      let outputStr = `[${chalk.cyan(d())}]`
+      const payload = {}
+      const data = espdevice.slice(2,-1).split('", "')
+        .map(r => r.split('": "'))
+      
+      data.forEach(r => {
+        switch(r[0]) {
+          case 'Active Time':
+            payload.ontime = parseInt(r[1]) * 60
+            break
+          case 'Device Name':
+            payload.alias = r[1]
+            if (etekDevices[r[1]]) {
+              const deviceMeta = etekDevices[r[1]]
+              payload.device = deviceMeta.i
+              payload.mac = deviceMeta.m
+            }
+            break
+          case 'Energy':
+            payload.day = parseFloat(r[1])
+            break
+          case 'Energy Month':
+            payload.month = parseFloat(r[1])
+            break
+          case 'Power':
+            payload.power = parseFloat(r[1])
+            break
+          case 'Status':
+            payload.state = r[1].toLowerCase() === 'on' ? 1 : 0
+            break
+          case 'Voltage':
+            payload.volt = parseFloat(r[1])
+            break
+          default:
+            break
+        }
+      })
+
+      outputStr += `[${chalk.green(payload.device)}] ${chalk.green(payload.alias)}`
+      loggerFunc('tplink').info({'message': payload})
+      console.log(outputStr)
+    })
+  } catch (excp) {
+    console.log(excp.message)
+  } finally {
+    console.log(chalk.cyan(`Finished processing of etek ESP32 devices`))
+  }
+
+  return {}
+}
+
 /** Runs once every hour 
  * 
 */
@@ -157,6 +215,8 @@ cron.schedule('0 */5 * * * *', () => {
 
     console.log(outputStr)
   })
+
+  getEtekStats().then(() => {})
 })
 
 /** Runs once every 9 hours to get historic information

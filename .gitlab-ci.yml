@@ -11,6 +11,7 @@ cache:
 
 stages:
   - build
+  - security 
   - quality
   - dockerize
 
@@ -63,7 +64,7 @@ sast:
   artifacts:
     reports:
       sast: gl-sast-report.json
-  stage: quality
+  stage: security
   variables:
     SAST_EXCLUDED_PATHS: '/test/**,**/*-test.js,/scripts,/build-scripts'
     SEARCH_MAX_DEPTH: 4
@@ -73,5 +74,5 @@ sast:
   artifacts:
     reports:
       secret_detection: gl-secret-detection-report.json
-  stage: quality
+  stage: security 
   needs: []
